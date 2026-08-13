@@ -110,12 +110,15 @@
   .board-row .score{font-family:var(--font-mono); color:var(--khaki);}
   .board-empty{padding:24px; color:var(--steel);}
 
+  .leaderboard-actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:4px;}
+
   .staff-reset{position:absolute; bottom:10px; right:10px; width:32px; height:32px; border-radius:50%; background:var(--ground-dark); border:1px solid var(--steel-dark); color:var(--steel); font-size:15px; opacity:.35; z-index:50;}
   .staff-fullscreen{position:absolute; bottom:10px; right:52px; width:32px; height:32px; border-radius:50%; background:var(--ground-dark); border:1px solid var(--steel-dark); color:var(--steel); font-size:15px; opacity:.35; z-index:50;}
   #fullscreen-resume{position:absolute; inset:0; z-index:100; background:rgba(33,38,28,0.92); display:flex; align-items:center; justify-content:center; cursor:pointer;}
   .fs-resume-box{border:2px solid var(--caution); border-radius:12px; padding:28px 44px; text-align:center;}
   .fs-resume-text{font-family:var(--font-display); font-size:28px; letter-spacing:.06em; color:var(--caution); text-transform:uppercase; animation:pulse 1.6s ease-in-out infinite;}
   .export-link{margin-top:16px; font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; color:var(--steel); background:transparent; border:1px solid var(--steel-dark); border-radius:6px; padding:8px 16px; text-transform:uppercase; opacity:.6;}
+  .export-link:disabled{opacity:.35; cursor:default;}
 </style>
 </head>
 <body>
@@ -186,7 +189,10 @@
     <h1 class="stencil-title" data-text="LEADERBOARD">LEADERBOARD</h1>
     <div class="board" id="board"></div>
     <button class="ghost-btn" id="btn-play-again">PLAY AGAIN</button>
-    <button class="export-link" id="staff-export" title="Export raffle entries (CSV)">&#8595; EXPORT ENTRIES (STAFF)</button>
+    <div class="leaderboard-actions">
+      <button class="export-link" id="staff-export" title="Export raffle entries (CSV)">&#8595; EXPORT ENTRIES (STAFF)</button>
+      <button class="export-link" id="staff-send-report" title="Email current scores">&#9993; SEND REPORT (STAFF)</button>
+    </div>
   </div>
 
   <button class="staff-fullscreen" id="staff-fullscreen" title="Toggle fullscreen">&#9974;</button>
@@ -345,6 +351,69 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // ---- Make.com webhook report (staff-triggered only, never automatic) ----
+  // Tapping "Send Report" on the leaderboard bundles the entire current
+  // leaderboard into one HTML table and POSTs it to a Make.com webhook,
+  // which forwards it on as an email. This never fires automatically on
+  // every play -- only on demand -- so the booth doesn't get flooded with
+  // an email per player.
+  var SYNC_WEBHOOK_URL = 'https://hook.us1.make.com/rnclsa7x9s1bqe2d6laag3cruesoqbc3';
+
+  document.getElementById('staff-send-report').addEventListener('click', function(e){
+    e.stopPropagation();
+    sendReportToMake();
+  });
+
+  function sendReportToMake(){
+    var list = [];
+    try{
+      var existing = localStorage.getItem(LB_KEY);
+      if(existing) list = JSON.parse(existing);
+    }catch(err){ list = []; }
+
+    if(list.length === 0){
+      alert('No entries yet -- nothing to send.');
+      return;
+    }
+
+    var rowsHtml = list.map(function(e){
+      return '<tr>' +
+        '<td>' + escapeHtml(e.firstName || '') + ' ' + escapeHtml(e.lastName || '') + '</td>' +
+        '<td>' + escapeHtml(e.contact || '') + '</td>' +
+        '<td>' + e.score + '</td>' +
+        '<td>' + new Date(e.ts).toLocaleString() + '</td>' +
+        '</tr>';
+    }).join('');
+
+    var reportHtml =
+      '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;">' +
+      '<tr><th>Name</th><th>Contact</th><th>Score</th><th>Entered At</th></tr>' +
+      rowsHtml +
+      '</table>';
+
+    var btn = document.getElementById('staff-send-report');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = '&#9203; SENDING...';
+    btn.disabled = true;
+
+    fetch(SYNC_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        entryCount: list.length,
+        reportHtml: reportHtml,
+        sentAt: new Date().toISOString()
+      })
+    }).then(function(){
+      btn.innerHTML = '&#10003; SENT';
+      setTimeout(function(){ btn.innerHTML = originalText; btn.disabled = false; }, 2500);
+    }).catch(function(err){
+      console.error('Send failed', err);
+      btn.innerHTML = '&#10005; FAILED';
+      setTimeout(function(){ btn.innerHTML = originalText; btn.disabled = false; }, 2500);
+    });
   }
 
   var stageWrap = document.getElementById('stage-wrap');
@@ -681,9 +750,9 @@
   // across devices, so entries are saved with localStorage. That means they
   // persist reliably on ONE browser/device (exactly what you want for a
   // single touchscreen kiosk running all conference), but a second kiosk or
-  // laptop would have its own separate list. If you ever need one shared
-  // list across multiple screens, that requires a small backend (e.g.
-  // Firebase/Supabase) -- ask if you want that built out instead.
+  // laptop would have its own separate list. Scores are only sent off-device
+  // when staff taps "Send Report" on the leaderboard screen (see
+  // sendReportToMake above) -- nothing is synced automatically per-play.
   var LB_KEY = 'sarge-leaderboard-entries';
 
   function submitScore(firstName, lastName, contact, score){
