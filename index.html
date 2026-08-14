@@ -92,21 +92,40 @@
   .key-check{width:18px; height:18px; border-radius:50%; border:2px solid var(--steel); flex-shrink:0;}
   .key-item.found .key-check{background:var(--caution); border-color:var(--caution);}
 
-  #screen-complete .result-card{background:var(--ground-dark); border:2px solid var(--steel-dark); border-radius:12px; padding:24px 36px; margin-bottom:16px; min-width:320px;}
-  #screen-complete .result-line{font-size:19px; margin:5px 0; color:var(--khaki);}
-  #screen-complete .result-score{font-family:var(--font-mono); font-size:44px; color:var(--caution);}
-  .dogtag{width:340px; padding:16px 24px; margin:8px auto; background:var(--steel); color:var(--ink); border-radius:22px; font-family:var(--font-mono); font-size:24px; letter-spacing:.15em; text-align:center; min-height:32px; box-shadow:inset 0 2px 4px rgba(0,0,0,.3); border:3px solid transparent; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  #screen-complete{flex-direction:row; align-items:center; justify-content:center; gap:4vw; padding:0 3vw;}
+  #screen-complete .complete-col{display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  #screen-complete .complete-col-left{flex:0 0 auto; max-width:34vw;}
+  #screen-complete .complete-col-right{flex:0 0 auto;}
+  #screen-complete .result-card{background:var(--ground-dark); border:2px solid var(--steel-dark); border-radius:12px; padding:18px 28px; margin-bottom:10px; min-width:260px;}
+  #screen-complete .result-line{font-size:16px; margin:4px 0; color:var(--khaki);}
+  #screen-complete .result-score{font-family:var(--font-mono); font-size:36px; color:var(--caution);}
+  #screen-complete .stencil-title{font-size:34px;}
+  .dogtag{width:300px; padding:10px 20px; margin:6px auto; background:var(--steel); color:var(--ink); border-radius:20px; font-family:var(--font-mono); font-size:19px; letter-spacing:.13em; text-align:center; min-height:26px; box-shadow:inset 0 2px 4px rgba(0,0,0,.3); border:3px solid transparent; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dogtag.placeholder{color:var(--steel-dark);}
   .dogtag.active-field{border-color:var(--caution);}
-  .name-row{display:flex; gap:12px; justify-content:center; width:min(92vw,420px); margin:0 auto;}
-  .name-row .dogtag{width:auto; flex:1; margin:8px 0; font-size:19px; padding:16px 12px;}
-  #contact-display{font-size:18px; width:min(92vw,420px); letter-spacing:.05em;}
-  .raffle-warn{font-family:var(--font-mono); font-size:13px; color:#ffb199; letter-spacing:.05em; margin-top:10px; max-width:420px;}
-  .keyboard{display:grid; grid-template-columns:repeat(10,1fr); gap:12px; max-width:620px; width:92vw; margin:20px auto;}
-  .key{background:var(--ground-dark); border:2px solid var(--steel-dark); color:var(--khaki); font-family:var(--font-body); font-weight:600; font-size:20px; border-radius:8px; padding:16px 0; text-transform:uppercase; line-height:1;}
+  .name-row{display:flex; gap:10px; justify-content:center; width:min(40vw,380px); margin:0 auto;}
+  .name-row .dogtag{width:auto; flex:1; margin:6px 0; font-size:16px; padding:10px 10px;}
+  #contact-display{font-size:15px; width:min(40vw,380px); letter-spacing:.05em;}
+  .raffle-warn{font-family:var(--font-mono); font-size:12px; color:#ffb199; letter-spacing:.05em; margin-top:8px; max-width:380px;}
+  .keyboard{display:grid; grid-template-columns:repeat(10,1fr); gap:8px; max-width:440px; width:min(42vw,440px); margin:14px auto;}
+  .key{background:var(--ground-dark); border:2px solid var(--steel-dark); color:var(--khaki); font-family:var(--font-body); font-weight:600; font-size:15px; border-radius:7px; padding:11px 0; text-transform:uppercase; line-height:1;}
   .key:active{background:var(--steel-dark);}
   .key.wide{grid-column:span 5;}
-  .raffle-note{font-family:var(--font-mono); font-size:13px; color:var(--caution); letter-spacing:.1em; margin-top:12px; max-width:420px;}
+  .raffle-note{font-family:var(--font-mono); font-size:12px; color:var(--caution); letter-spacing:.1em; margin-top:8px; max-width:380px;}
+
+  /* On narrower/portrait screens the side-by-side complete layout has no
+     room to breathe, so it drops back to the original stacked column. The
+     1920x1080-landscape kiosk this was built for stays on the two-column
+     layout above (that's the one working around the display's vertical
+     crop), this is purely a safety fallback for any other device/orientation
+     this page might ever be opened on. */
+  @media(max-width:900px), (max-height:700px) and (orientation:portrait){
+    #screen-complete{flex-direction:column; gap:0; padding:0 4vw;}
+    #screen-complete .complete-col-left{max-width:92vw;}
+    .name-row{width:min(92vw,420px);}
+    #contact-display{width:min(92vw,420px);}
+    .keyboard{width:92vw; max-width:620px;}
+  }
 
   #screen-leaderboard .stencil-title{font-size:42px;}
   .board{width:min(90vw,600px); background:var(--ground-dark); border:2px solid var(--steel-dark); border-radius:10px; margin:16px 0 22px; overflow:hidden; max-height:50vh; overflow-y:auto;}
@@ -172,23 +191,27 @@
   </div>
 
   <div class="screen" id="screen-complete">
-    <div class="eyebrow" id="complete-eyebrow">Mission Report</div>
-    <h1 class="stencil-title" data-text="YARD CLEARED">YARD CLEARED</h1>
-    <div class="result-card">
-      <div class="result-line" id="result-found">Recovered: 6/6</div>
-      <div class="result-line" id="result-time">Time remaining: 12s</div>
-      <div class="result-score" id="result-score">1240</div>
+    <div class="complete-col complete-col-left">
+      <div class="eyebrow" id="complete-eyebrow">Mission Report</div>
+      <h1 class="stencil-title" data-text="YARD CLEARED">YARD CLEARED</h1>
+      <div class="result-card">
+        <div class="result-line" id="result-found">Recovered: 6/6</div>
+        <div class="result-line" id="result-time">Time remaining: 12s</div>
+        <div class="result-score" id="result-score">1240</div>
+      </div>
     </div>
-    <div class="eyebrow">Stamp your dog tag to enter</div>
-    <div class="name-row">
-      <div class="dogtag placeholder active-field" id="first-name-display">FIRST NAME</div>
-      <div class="dogtag placeholder" id="last-name-display">LAST NAME</div>
+    <div class="complete-col complete-col-right">
+      <div class="eyebrow">Stamp your dog tag to enter</div>
+      <div class="name-row">
+        <div class="dogtag placeholder active-field" id="first-name-display">FIRST NAME</div>
+        <div class="dogtag placeholder" id="last-name-display">LAST NAME</div>
+      </div>
+      <div class="dogtag placeholder" id="contact-display">EMAIL OR PHONE</div>
+      <div class="keyboard" id="keyboard"></div>
+      <button class="big-btn" id="btn-submit-name" style="margin-top:6px;">LOCK IT IN</button>
+      <div class="raffle-note" id="raffle-note" style="visibility:hidden;">&#10003; ENTERED IN THE PRIZE RAFFLE &mdash; CHECK THE LEADERBOARD</div>
+      <div class="raffle-warn" id="raffle-warn" style="visibility:hidden;">Enter an email or phone number to be entered in the raffle</div>
     </div>
-    <div class="dogtag placeholder" id="contact-display">EMAIL OR PHONE</div>
-    <div class="keyboard" id="keyboard"></div>
-    <button class="big-btn" id="btn-submit-name" style="margin-top:6px;">LOCK IT IN</button>
-    <div class="raffle-note" id="raffle-note" style="visibility:hidden;">&#10003; ENTERED IN THE PRIZE RAFFLE &mdash; CHECK THE LEADERBOARD</div>
-    <div class="raffle-warn" id="raffle-warn" style="visibility:hidden;">Enter an email or phone number to be entered in the raffle</div>
   </div>
 
   <div class="screen" id="screen-leaderboard">
