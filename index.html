@@ -94,12 +94,14 @@
 
   #screen-complete{flex-direction:row; align-items:center; justify-content:center; gap:4vw; padding:0 3vw;}
   #screen-complete .complete-col{display:flex; flex-direction:column; align-items:center; justify-content:center;}
-  #screen-complete .complete-col-left{flex:0 0 auto; max-width:34vw;}
+  #screen-complete .complete-col-left{flex:0 0 auto; max-width:34vw; gap:2px;}
+  #screen-complete .complete-col-left .eyebrow,
+  #screen-complete .complete-col-left .stencil-title{margin:0;}
   #screen-complete .complete-col-right{flex:0 0 auto;}
-  #screen-complete .result-card{background:var(--ground-dark); border:2px solid var(--steel-dark); border-radius:12px; padding:18px 28px; margin-bottom:10px; min-width:260px;}
+  #screen-complete .result-card{background:var(--ground-dark); border:2px solid var(--steel-dark); border-radius:12px; padding:14px 28px; margin:6px 0 0; min-width:260px;}
   #screen-complete .result-line{font-size:16px; margin:4px 0; color:var(--khaki);}
   #screen-complete .result-score{font-family:var(--font-mono); font-size:36px; color:var(--caution);}
-  #screen-complete .stencil-title{font-size:34px;}
+  #screen-complete .stencil-title{font-size:34px; line-height:.85;}
   .dogtag{width:300px; padding:10px 20px; margin:6px auto; background:var(--steel); color:var(--ink); border-radius:20px; font-family:var(--font-mono); font-size:19px; letter-spacing:.13em; text-align:center; min-height:26px; box-shadow:inset 0 2px 4px rgba(0,0,0,.3); border:3px solid transparent; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dogtag.placeholder{color:var(--steel-dark);}
   .dogtag.active-field{border-color:var(--caution);}
